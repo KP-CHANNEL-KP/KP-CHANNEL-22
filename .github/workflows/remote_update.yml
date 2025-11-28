@@ -1,0 +1,30 @@
+# remote_update.yml
+name: 📞 External Triggered Update
+on:
+  # အပြင်က Automation Service ကနေ ခေါ်လိုက်တာကို လက်ခံဖို့
+  workflow_dispatch:
+    inputs:
+      new_content:
+        description: 'New text content to add'
+        required: true
+        default: 'No content provided'
+
+jobs:
+  update-file:
+    runs-on: ubuntu-latest
+    steps:
+      # ၁။ Repo ကို ဆွဲချ (Checkout)
+      - uses: actions/checkout@v4
+
+      # ၂။ စာသားကို ဖိုင်ထဲ ထည့် (ဥပမာ: README.md)
+      - name: Add Content to File
+        # အပြင်ကနေ ပို့လာတဲ့ စာသားကို README.md ရဲ့ အောက်ဆုံးမှာ ထပ်ထည့်မယ်
+        run: echo "* ${{ github.event.inputs.new_content }}" >> README.md
+
+      # ၃။ အလိုအလျောက် Commit & Push လုပ်
+      - name: Commit and Push
+        # Changes တွေကို အလိုအလျောက် Commit/Push လုပ်ပေးတဲ့ Tool
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Mobile Entry: ${{ github.event.inputs.new_content }}"
+          # GitHub Actions မှာ default ပါတဲ့ Token ကို သုံးပါတယ်။
