@@ -1,30 +1,32 @@
-# remote_update.yml
-name: 📞 External Triggered Update
+# .github/workflows/remote_update.yml
+name: 📞 External Triggered Config Update
+
+# အပြင်က Automation Service (IFTTT) ကနေ အချက်ပြလိုက်တာကို လက်ခံဖို့
 on:
-  # အပြင်က Automation Service ကနေ ခေါ်လိုက်တာကို လက်ခံဖို့
   workflow_dispatch:
     inputs:
       new_content:
-        description: 'New text content to add'
+        description: 'New content (Encoded string) for config.json'
         required: true
         default: 'No content provided'
 
 jobs:
-  update-file:
+  update-config-file:
     runs-on: ubuntu-latest
     steps:
       # ၁။ Repo ကို ဆွဲချ (Checkout)
       - uses: actions/checkout@v4
-
-      # ၂။ စာသားကို ဖိုင်ထဲ ထည့် (ဥပမာ: README.md)
-      - name: Add Content to File
-        # အပြင်ကနေ ပို့လာတဲ့ စာသားကို README.md ရဲ့ အောက်ဆုံးမှာ ထပ်ထည့်မယ်
-        run: echo "* ${{ github.event.inputs.new_content }}" >> README.md
-
+      
+      # ၂။ config.json ဖိုင်အဟောင်းကို ဖျက်ပြီး၊ Telegram ကနေ ရလာတဲ့ စာသားအသစ်နဲ့ အစားထိုး (Overwrite) လုပ်မယ်။
+      # > တစ်ခုတည်းသာ သုံးခြင်းဖြင့် ဖိုင်တစ်ခုလုံးကို အစားထိုးသွားပါမည်။
+      - name: Overwrite config.json
+        # NOTE: သင့်ရဲ့ config.json ဖိုင်နာမည်ကို မှန်ကန်စွာ ထည့်သွင်းပေးပါ
+        run: echo "${{ github.event.inputs.new_content }}" > config.json
+        
       # ၃။ အလိုအလျောက် Commit & Push လုပ်
       - name: Commit and Push
-        # Changes တွေကို အလိုအလျောက် Commit/Push လုပ်ပေးတဲ့ Tool
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Mobile Entry: ${{ github.event.inputs.new_content }}"
-          # GitHub Actions မှာ default ပါတဲ့ Token ကို သုံးပါတယ်။
+          commit_message: "Mobile JSON Update (Telegram Triggered)"
+          # config.json ဖိုင်တစ်ခုတည်းကိုသာ Commit လုပ်ရန်
+          files: config.json
